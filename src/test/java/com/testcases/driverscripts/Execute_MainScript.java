@@ -86,7 +86,7 @@ public class Execute_MainScript {
 	long startTime ;
 	String Object;
 	File Reportdir;
-
+	File TempReportdir;
 
 	Xls_writer xls_writer=new Xls_writer();
 
@@ -119,11 +119,17 @@ public class Execute_MainScript {
 		Startdate = new Date() ;
 		StartTime = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss") ;
 		String rep_file=System.getProperty("user.dir") +"\\Reports\\"+ StartTime.format(Startdate)+"\\STMExtentReport_"+uc.SiteName+".html";
+		String TempRep_file=System.getProperty("user.dir") +"\\test-output\\STMExtentReport_"+uc.SiteName+".html";
 		Reportdir= new File(rep_file);
 		Reportdir.getParentFile().mkdirs();
 		Reportdir.createNewFile();
-
+		
+		TempReportdir= new File(TempRep_file);
+		TempReportdir.getParentFile().mkdirs();
+		TempReportdir.createNewFile();
+		
 		htmlreporter= new ExtentHtmlReporter(Reportdir);
+		htmlreporter= new ExtentHtmlReporter(TempReportdir);
 
 		extent = new ExtentReports ();
 
