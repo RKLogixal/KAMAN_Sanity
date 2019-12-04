@@ -15,11 +15,13 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -39,6 +41,8 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
+import com.operations.Common.FireClass;
+import com.operations.Common.Constants;
 import com.operations.Common.ReadUserconfig;
 import com.operations.Common.Readconfig;
 import com.operations.Common.Script_executor;
@@ -64,6 +68,7 @@ public class Execute_MainScript {
 	public static Logger Applog;
 
 	public static ExtentHtmlReporter htmlreporter;
+	public static ExtentHtmlReporter htmlTempreporter;
 
 	public static ExtentReports extent;
 
@@ -95,6 +100,7 @@ public class Execute_MainScript {
 	SendStatusReport email =new SendStatusReport();
 	StringWriter stack = new StringWriter();
 	Script_executor screxe = new Script_executor();
+	FireClass FC = new FireClass();
 
 	public static SimpleDateFormat StartTime;
 	public static SimpleDateFormat EndTime;
@@ -111,32 +117,34 @@ public class Execute_MainScript {
 
 		rc.getObjectRepository();
 		uc.getUserConfig();
-
+		extent = new ExtentReports ();
 		Applog=Logger.getLogger(uc.SiteName);
 
 
-		PropertyConfigurator.configure("./resources/Log4j.properties");
+		PropertyConfigurator.configure(System.getProperty("user.dir")+"/Resources/log4j.properties");
 		Startdate = new Date() ;
 		StartTime = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss") ;
-		String rep_file=System.getProperty("user.dir") +"\\Reports\\"+ StartTime.format(Startdate)+"\\STMExtentReport_"+uc.SiteName+".html";
-		String TempRep_file=System.getProperty("user.dir") +"\\test-output\\STMExtentReport_"+uc.SiteName+".html";
-		Reportdir= new File(rep_file);
-		Reportdir.getParentFile().mkdirs();
-		Reportdir.createNewFile();
-		
+
+		String TempRep_file=System.getProperty("user.dir") +"/test-output/TestSummary_Report.html";
 		TempReportdir= new File(TempRep_file);
 		TempReportdir.getParentFile().mkdirs();
 		TempReportdir.createNewFile();
-		
-		htmlreporter= new ExtentHtmlReporter(Reportdir);
-		htmlreporter= new ExtentHtmlReporter(TempReportdir);
 
-		extent = new ExtentReports ();
+		if ((uc.HistoricalReports).equalsIgnoreCase("Yes")) {
 
-		extent.attachReporter(htmlreporter);
+			String rep_file=System.getProperty("user.dir") +"/Reports/"+ StartTime.format(Startdate)+"/TestSummary_Report.html";
+			Reportdir= new File(rep_file);
+			Reportdir.getParentFile().mkdirs();
+			Reportdir.createNewFile();
+			htmlreporter= new ExtentHtmlReporter(Reportdir);
+			extent.attachReporter(htmlreporter);
+		}
+
+		htmlTempreporter= new ExtentHtmlReporter(TempReportdir);
 
 
 
+		extent.attachReporter(htmlTempreporter);
 
 		//startTime = System.
 		Applog.info("Execution started on " + StartTime.format(Startdate));
@@ -174,12 +182,29 @@ public class Execute_MainScript {
 
 			} else if (browser.equalsIgnoreCase("chrome"))
 			{
-				System.setProperty("webdriver.chrome.driver", System.getProperty("user.dir") +"/Browser_files/chromedriver_win32/chromedriver.exe");
-				//WebDriverManager.chromedriver().setup();
-				webdriver = new ChromeDriver();
-				//Dimension d = new Dimension(DeviceScrWidth, DeviceScrHeight);
-				//webdriver.manage().window().setSize(d);
-				webdriver.manage().window().maximize();
+
+				if(uc.OS.equalsIgnoreCase("Linux")) {
+
+					//System.setProperty("webdriver.chrome.driver", System.getProperty("user.dir") +"/Browser_files/chromedriver_linux64/chromedriver");
+					System.setProperty("webdriver.chrome.driver", System.getProperty("user.dir") +"/Browser_files/chromedriver_win32/chromedriver.exe");
+					ChromeOptions options = new ChromeOptions();
+					//options.addArguments("--headless");
+					options.addArguments("--no-sandbox");
+					options.addArguments("--disable-dev-shm-usage");
+					options.addArguments("window-size=1364,768");
+					webdriver = new ChromeDriver(options);
+					//webdriver.manage().window().maximize();
+				}
+
+				else if (uc.OS.equalsIgnoreCase("Windows")) {
+					System.setProperty("webdriver.chrome.driver", System.getProperty("user.dir") +"/Browser_files/chromedriver_win32/chromedriver.exe");
+					//WebDriverManager.chromedriver().setup();
+					webdriver = new ChromeDriver();
+					//Dimension d = new Dimension(DeviceScrWidth, DeviceScrHeight);
+					//webdriver.manage().window().setSize(d);
+					webdriver.manage().window().maximize();
+				}
+
 
 				this.browser_name=browser;
 				this.Channel=Channel;
@@ -243,60 +268,57 @@ public class Execute_MainScript {
 		this.Testcasenumber=Testcasenumber;
 		this.Sitename=uc.SiteName;
 
+
 		if(Executionmode.equalsIgnoreCase("Yes")){
 			try {
 				if(Channel.equalsIgnoreCase("Desktop")){
-					scre.Execute_script(Sitename,browser_name,"./Input_files/Actual_testcases/"+uc.SiteName+"/","./Output_files/"+StartTime.format(Startdate)+"/"+Sitename+"/"+browser_name+"/",
-							"./Screenshots/"+StartTime.format(Startdate)+"/"+uc.SiteName+"/"+browser_name+"/", webdriver,Section,Functionality, Testcasenumber, Testcase_description, Executionmode, Severity,extent,Applog);
+
+					if(uc.OS.equalsIgnoreCase("Windows")) {
+
+						FC.ExecuteTestcasesWindows(Testcasenumber, scre, Sitename, browser_name,StartTime, Startdate, webdriver, Functionality, Section, Testcase_description, Executionmode, Severity, extent, Applog);
+					}
+
+					if(uc.OS.equalsIgnoreCase("Linux")) {
+
+						FC.ExecuteTestcasesLinux(Testcasenumber, scre, Sitename, browser_name,StartTime, Startdate, webdriver, Functionality, Section, Testcase_description, Executionmode, Severity, extent, Applog);
+					}
+
+					else {
+						//System.out.println("Please Specify OS correctly i.e. either Windows or Linux...!!!!");
+					}
+					//System.out.println("Currently running Testcase : " + Testcasenumber);
+					//	scre.Execute_script(Sitename,browser_name,Constants.Windows_InputFileLocation+uc.SiteName+"/",Constants.Windows_OutputFileLocation+StartTime.format(Startdate)+"/"+Sitename+"/"+browser_name+"/",
+					//		Constants.Windows_ScreenshotsLocation+StartTime.format(Startdate)+"/"+uc.SiteName+"/"+browser_name+"/", webdriver,Section,Functionality, Testcasenumber, Testcase_description, Executionmode, Severity,uc.Scr,uc.ExcelReports,extent,Applog);
 
 				}
 				else if (Channel.equalsIgnoreCase("Mobile")) {
 					scre.Execute_script(Sitename,browser_name,"./Input_files/Actual_testcases/"+uc.SiteName+"/","./Output_files/"+StartTime.format(Startdate)+"/"+Sitename+"/"+browser_name+"/"+Device+"/",
-							"./Screenshots/"+StartTime.format(Startdate)+"/"+uc.SiteName+"/"+browser_name+"/"+Device+"/", webdriver,Section,Functionality, Testcasenumber, Testcase_description, Executionmode, Severity,extent,Applog);
+							"./Screenshots/"+StartTime.format(Startdate)+"/"+uc.SiteName+"/"+browser_name+"/"+Device+"/", webdriver,Section,Functionality, Testcasenumber, Testcase_description, Executionmode, Severity,uc.Scr,uc.ExcelReports,extent,Applog);
 
 				}
 
-			} catch (TimeoutException e) {
+			} catch (TimeoutException Te) {
 
 
-				try {
+				Te.printStackTrace(new PrintWriter(stack));
+				Applog.error(stack.toString());
+				FC.FailedTCOperation(Testcase_description, screxe, webdriver, xls_writer, Testscase_failresults, browser_name, Functionality, Testcasenumber, Severity, StartTime, Startdate, softAssert, test, extent);
 
-					webdriver.findElement(By.xpath("//a[@class='dropdown-toggle']")).click();
-					Thread.sleep(2000);
-					webdriver.findElement(By.linkText("Log Out")).click();
-					Object=screxe.Object;
-					e.printStackTrace(new PrintWriter(stack));
-					xls_writer.GenerateFailReport(Testscase_failresults, uc.SiteName, browser_name, Functionality, Testcasenumber, Severity,"./Failed_Reports/"+StartTime.format(Startdate)+"/"+uc.SiteName+"/"+browser_name+"/");
+			}
 
-					Applog.error(stack.toString());
+			catch(NoSuchElementException Nse) {
 
-					softAssert.assertAll();
+				Nse.printStackTrace(new PrintWriter(stack));
+				Applog.error(stack.toString());
+				FC.FailedTCOperation(Testcase_description, screxe, webdriver, xls_writer, Testscase_failresults, browser_name, Functionality, Testcasenumber, Severity, StartTime, Startdate, softAssert, test, extent);
 
-					failmsg="Timeout issue occured while trying to locate element: " +"'" + Object + "'.You May put WAIT keyword before the step to avoid Timeout issues." ;
-					test = extent.createTest(browser_name+"_"+Testcasenumber);	
-					test.fail(MarkupHelper.createLabel(failmsg,ExtentColor.RED));
-					//test.fail(MarkupHelper.createLabel(Testcasenumber+" has been failed....", ExtentColor.RED));
-					Assert.fail(failmsg);
+			}
+			catch(Exception e) {
 
-				}
-
-				catch(Exception te) {
-
-					Object=screxe.Object;
-					e.printStackTrace(new PrintWriter(stack));
-					xls_writer.GenerateFailReport(Testscase_failresults, uc.SiteName, browser_name, Functionality, Testcasenumber, Severity,"./Failed_Reports/"+StartTime.format(Startdate)+"/"+uc.SiteName+"/"+browser_name+"/");
-
-					Applog.error(stack.toString());
-
-					softAssert.assertAll();
-
-					failmsg="Timeout issue occured while trying to locate element: " +"'" + Object + "'.You May put WAIT keyword before the step to avoid Timeout issues." ;
-					test = extent.createTest(browser_name+"_"+Testcasenumber);	
-					test.fail(MarkupHelper.createLabel(failmsg,ExtentColor.RED));
-					//test.fail(MarkupHelper.createLabel(Testcasenumber+" has been failed....", ExtentColor.RED));
-					Assert.fail(failmsg);
-				}
-
+				e.printStackTrace(new PrintWriter(stack));
+				Applog.error(stack.toString());
+				//FC.FailedTCOperation(Testcase_description, screxe, webdriver, xls_writer, Testscase_failresults, browser_name, Functionality, Testcasenumber, Severity, StartTime, Startdate, softAssert, test, extent);
+				Assert.fail(stack.toString());
 
 				//	}
 				//stack.flush();
@@ -304,37 +326,14 @@ public class Execute_MainScript {
 
 			}
 
-			catch (Exception e) {
-
-				/*Boolean bl = webdriver.findElement(By.xpath("//*[@id='atg_store_locale']/div/ul/li[1]/span")).isDisplayed();
-
-				if(bl==true) {
-
-					webdriver.findElement(By.xpath("//*[@id='atg_store_locale']/div/ul/li[2]")).click();
-
-
-				}
-				 */
-				e.printStackTrace(new PrintWriter(stack));
-				System.out.println(e);
-				xls_writer.GenerateFailReport(Testscase_failresults, uc.SiteName, browser_name, Functionality, Testcasenumber, Severity,"./Failed_Reports/"+StartTime.format(Startdate)+"/"+uc.SiteName+"/"+browser_name+"/");
-
-				Applog.error(stack.toString());
-				softAssert.assertAll();
-				test = extent.createTest(browser_name+"_"+Testcasenumber);	
-				test.fail(MarkupHelper.createLabel(stack.toString(),ExtentColor.RED));
-
-				Assert.fail(stack.toString());
-
-				stack.flush();
-
-
-			}
-
 		}
 		else{
 
-			xls_writer.GenearateSkipFile(Testcase_skipresults,Functionality, Testcasenumber, Severity,"./Output_files/"+StartTime.format(Startdate)+"/"+uc.SiteName+"/"+browser_name+"/");
+			if(uc.ExcelReports.equalsIgnoreCase("Yes")) {
+
+				xls_writer.GenearateSkipFile(Testcase_skipresults,Functionality, Testcasenumber, Severity,System.getProperty("user.dir")+"/Output_files/"+StartTime.format(Startdate)+"/"+uc.SiteName+"/"+browser_name+"/");
+			}
+
 			Applog.info(Testcasenumber + " has been skipped for this execution...");
 			throw new SkipException(Testcasenumber +" has been skipped..");
 		}
@@ -416,8 +415,11 @@ public class Execute_MainScript {
 		}
 		else if(browser.equalsIgnoreCase("chrome")){
 			webdriver.close();
-			Runtime rt = Runtime.getRuntime();
-			rt.exec("taskkill /F /IM chromedriver.exe");
+			if(uc.OS.equalsIgnoreCase("Windows")) {
+				Runtime rt = Runtime.getRuntime();
+				rt.exec("taskkill /F /IM chromedriver.exe");
+			}
+			
 
 		}
 		else if(browser.equalsIgnoreCase("ie")){

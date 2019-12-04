@@ -25,19 +25,19 @@ public class SendStatusReport {
 	private Authenticator authenticator;
 
 	public SendStatusReport () {
-		from = "rohit.karkhanis@logixal.com";
+		from = "jenkinslogixal@logixal.com";
 		to = "rohit.karkhanis@logixal.com";
 		subject = "Automation Test execution Status";
 		messageBody = "<html><body>Automation test execution status for Build#$BUILD_NUMBER is [$BUILD_STATUS]\r\n" + 
 				"\r\n" + "Please find attached report for details.</body></html>";
-		fileName = "STMExtentReport_Pride.html";
-		host = "smtp.office365.com";
+		fileName = "STMExtentReport_KAMAN.html";
+		host = "smtp.gmail.com";
 
 		authenticator = new SMTPAuthenticator ();
 		properties = System.getProperties ();
 		properties.put ( "mail.smtp.host", host );
 		properties.put ( "mail.smtp.starttls.enable", "true" );
-		properties.put ( "mail.smtp.port", "25" );
+		properties.put ( "mail.smtp.port", "587" );
 		properties.put ( "mail.smtp.auth", "true" );
 		properties.put("mail.smtp.starttls.enable", "true"); //enable STARTTLS
 	}
@@ -88,8 +88,8 @@ public class SendStatusReport {
 
 class SMTPAuthenticator extends Authenticator {
 
-	private static final String SMTP_AUTH_USER = "rohit.karkhanis@logixal.com";
-	private static final String SMTP_AUTH_PASSWORD = "P@ssw0rd";
+	private static final String SMTP_AUTH_USER = "jenkinslogixal@gmail.com";
+	private static final String SMTP_AUTH_PASSWORD = "Test@123";
 
 	public PasswordAuthentication getPasswordAuthentication () {
 		String username = SMTP_AUTH_USER;

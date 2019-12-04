@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.varia.ExternallyRolledFileAppender;
@@ -48,18 +49,20 @@ public class Script_executor {
 	File outdir;
 	Properties allObjects;
 	public static String Object;
+	long FinalTime = 0;
+	
 
 	public void Execute_script(String Sitename ,String browsername,String Filepath,String WriteOutput,String ScreenshotsPath, WebDriver driver,String Section,String Functionality,String Testcasenumber,
-			String Testcase_description , String Executionmode,String Severity,ExtentReports extent,Logger log) throws Throwable{
+			String Testcase_description , String Executionmode,String Severity,String Screenshots , String ExcelReports,ExtentReports extent,Logger log) throws Throwable{
 
 
 		Keywords_finder operation = new Keywords_finder(driver,log);
 		ReadObject object = new ReadObject();
-		
+
 		allObjects =  object.getObjectRepository();
 		
 		String InputFilepath=Filepath+Functionality+"/";
-		Readexcel = new Xls_Reader(System.getProperty("user.dir")+Filepath+Section+"/"+Functionality+"/"+Testcasenumber+".xlsx");
+		Readexcel = new Xls_Reader(Filepath+Section+"/"+Functionality+"/"+Testcasenumber+".xlsx");
 		File file =	new File(Filepath +Section+"/"+Functionality +"/"+ Testcasenumber+".xlsx");
 		FileInputStream inputStream = new FileInputStream(file);
 		XSSFWorkbook Workbook = null;
@@ -100,6 +103,8 @@ public class Script_executor {
 			Object=Readexcel.getCellDataBySheetName(Teststep_sheet_name, 2, i);
 			String ObjectType=Readexcel.getCellDataBySheetName(Teststep_sheet_name, 3, i);
 			String Data_descriptor=Readexcel.getCellDataBySheetName(Teststep_sheet_name, 4, i);
+			
+			long start = System.currentTimeMillis();
 
 			if(!(Data_descriptor=="")){
 				Test_value=hmap.get(Data_descriptor).toString();
@@ -112,28 +117,35 @@ public class Script_executor {
 				Teststeps_results.put(i+1, new Object[] {Wrk,  Keyword, Object,ObjectType,"","Pass"});
 
 			}
+			
+			if(Screenshots.equalsIgnoreCase("Yes")) {
+				try {
 
-			try {
-				scr.Screenshots(driver,ScreenshotsPath,Wrk);
+
+					scr.Screenshots(driver,ScreenshotsPath,Wrk);
 
 
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
+
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
 			}
-
 
 		}
 
-		GenerateTestResults(WriteOutput);
+		if(ExcelReports.equalsIgnoreCase("Yes")) {
+			
+			GenerateTestResults(WriteOutput);
+		}
+		
 		log.info("Execution Ended for testcase number : "+ Testcasenumber+" at time : " + dateFormat.format(date));
+		
 		scr=null;
 
 	}
-
-
-
 
 	public void GenerateTestResults(String WriteOutput) throws Throwable{
 

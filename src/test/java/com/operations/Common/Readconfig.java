@@ -14,13 +14,14 @@ public class Readconfig {
 	public String output_dir;
 	public String Screenshot_file;
 	public String hub;
+	public String Username;
 	//Properties c = new Properties();
  
 @Test
 	public void getObjectRepository() throws IOException{
 		//Read object repository file
 		
-		File configFile = new File("resources\\config.properties");
+		File configFile = new File(System.getProperty("user.dir")+"/Resources/Config.properties");
 		InputStream inputStream = new FileInputStream(configFile);
 		Properties prop1 = new Properties();
 		prop1.load(inputStream);
@@ -29,6 +30,7 @@ public class Readconfig {
 		output_dir = prop1.getProperty("output_dir");
 		Screenshot_file = prop1.getProperty("Screenshot_dir");
 		hub = prop1.getProperty("hub");
+		Username = prop1.getProperty("Username");
 		
 		
 		}
