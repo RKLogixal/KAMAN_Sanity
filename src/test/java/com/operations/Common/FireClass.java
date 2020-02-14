@@ -52,7 +52,7 @@ public class FireClass {
 		uc.getUserConfig();
 
 		Object=screxe.Object;
-		VerifyUserLoginforLogout(webdriver);
+		//VerifyUserLoginforLogout(webdriver);
 
 
 		if(uc.ExcelReports.equalsIgnoreCase("Yes")) {
@@ -71,12 +71,12 @@ public class FireClass {
 		test = extent.createTest(browser_name+"_"+Testcasenumber);	
 		test.fail(MarkupHelper.createLabel(failmsg,ExtentColor.RED));
 		
-		Actions Mouseaction = new Actions(webdriver);
+		/*Actions Mouseaction = new Actions(webdriver);
 		WebElement ele = webdriver.findElement(By.xpath("//div[text()='My Account']"));
 		Mouseaction.moveToElement(ele).build().perform();
 		webdriver.findElement(By.xpath("//*[@id='logout-button']")).click();
 		//test.fail(MarkupHelper.createLabel(Testcasenumber+" has been failed....", ExtentColor.RED));
-		Assert.fail(failmsg);
+		*/Assert.fail(failmsg);
 	}
 
 
