@@ -121,7 +121,7 @@ public class Keywords {
 				String hvalue = parts[1];
 				map.put(key, hvalue);
 			} else {
-				System.out.println("ignoring line: " + line);
+				//System.out.println("ignoring line: " + line);
 			}
 
 		}
@@ -263,7 +263,7 @@ public class Keywords {
 				{
 					if (key.equalsIgnoreCase(ActualValue)) {
 
-						System.out.println(map.get(key));
+					//	System.out.println(map.get(key));
 						driver.get(map.get(key));	
 						log.info("Successfully navigated to URL : " + map.get(key) );
 
@@ -437,7 +437,7 @@ public class Keywords {
 				//driver.manage().timeouts().implicitlyWait(10,TimeUnit.SECONDS) ;
 				Thread.sleep(10000);
 				List <WebElement> t2 =driver.findElements(this.getObject(p, objectName, objectType));
-				System.out.println("Current Cart items" + t2.size());
+				//System.out.println("Current Cart items" + t2.size());
 				Boolean Click = driver.findElement(this.getObject(p, objectName, objectType)).isDisplayed();
 				if (Click.booleanValue()==true){
 
@@ -575,7 +575,7 @@ public class Keywords {
 
 		log.info("Total links are : "+links.size());
 
-		System.out.println(links.size());
+		//System.out.println(links.size());
 
 		Iterator<WebElement> it = links.iterator();
 

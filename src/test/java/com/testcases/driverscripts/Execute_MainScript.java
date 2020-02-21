@@ -343,9 +343,11 @@ public class Execute_MainScript {
 	public void TestResults(ITestResult result) {
 		if (result.getStatus() == ITestResult.FAILURE) {
 
+			System.out.println("Test execution status : FAILED...!!!!");
 			if (Channel.equalsIgnoreCase("Mobile")) {
 				test = extent.createTest(Sitename+"_"+browser_name+"_"+Device+"_"+Testcasenumber);
 				test.fail(MarkupHelper.createLabel(Testcasenumber+" has been failed....", ExtentColor.RED));
+				System.out.println("Test execution status : FAILED...!!!!");
 			}
 			else {
 				//test = extent.createTest(browser_name+"_"+Testcasenumber);
@@ -359,12 +361,14 @@ public class Execute_MainScript {
 			if (Channel.equalsIgnoreCase("Mobile")) {
 				test = extent.createTest(Sitename+"_"+browser_name+"_"+Device+"_"+Testcasenumber);
 				test.skip(MarkupHelper.createLabel(Testcasenumber+" has been skipped for this execution...", ExtentColor.AMBER));
+				//System.out.println("Test execution status : SKIPPED.....");
 			}
 
 			else {
 
 				test = extent.createTest(browser_name+"_"+Testcasenumber);
 				test.skip(MarkupHelper.createLabel(Testcasenumber+" has been skipped for this execution...", ExtentColor.AMBER));
+				//System.out.println("Test execution status : SKIPPED.....");
 			}
 
 		}
@@ -373,10 +377,12 @@ public class Execute_MainScript {
 			if (Channel.equalsIgnoreCase("Mobile")) {
 				test = extent.createTest(Sitename+"_"+browser_name+"_"+Device+"_"+Testcasenumber);
 				test.pass(MarkupHelper.createLabel(Testcasenumber + " has been passed", ExtentColor.GREEN));
+				System.out.println("Test execution status : PASSED...$$$$");
 			}
 			else {
 				test = extent.createTest(browser_name+"_"+Testcasenumber);
 				test.pass(MarkupHelper.createLabel(Testcasenumber + " has been passed", ExtentColor.GREEN));
+				System.out.println("Test execution status : PASSED...$$$$");
 
 			}
 
