@@ -301,8 +301,42 @@ public class Keywords {
 	public void ENTERTEXT(WebDriver driver,Properties p,String objectName,String objectType,String value,ExtentTest test,Logger log) throws Exception{
 		WebDriverWait myWaitVar = new WebDriverWait(driver,20);
 		myWaitVar.until(ExpectedConditions.visibilityOfElementLocated(this.getObject(p, objectName, objectType)));
-		driver.findElement(this.getObject(p,objectName,objectType)).sendKeys(value);
+
+
+		if(value!=null){
+
+			if (value.contains("$")) {
+
+				String Spvalue[] = value.split("\\$");
+				String Part1 =Spvalue[0];
+				String ActualValue =Spvalue[1];
+
+
+				GetAppData(GetfilePath);
+
+
+				for (String key : map.keySet())
+				{
+					if (key.equalsIgnoreCase(ActualValue)) {
+
+						//System.out.println(map.get(key));
+						driver.findElement(this.getObject(p,objectName,objectType)).sendKeys(map.get(key));
+						log.info("Successfully Entered text into Element objectName : " + map.get(key) );
+						//System.out.println(map.get(key));
+
+
+
+					}
+				}
+			}
+			else {
+				driver.findElement(this.getObject(p,objectName,objectType)).sendKeys(value);
+			}
+		}
+		
 	}
+
+
 
 	public void VERIFY_ENABLED(WebDriver driver,Properties p,String objectName,String objectType,String value,ExtentTest test,Logger log) throws Exception{
 		boolean b1=Boolean.parseBoolean(value);  
@@ -422,7 +456,47 @@ public class Keywords {
 
 	}
 
+	public void ELEMENT_FROM_LIST(WebDriver driver,Properties p,String objectName,String objectType,String value) throws Exception {
+		//WebDriverWait myWaitVar = new WebDriverWait(driver,20);
 
+		List <WebElement> ELELIST =driver.findElements(this.getObject(p, objectName, objectType));
+		//System.out.println("Total cart items :" + t1.size());
+
+		if(ELELIST.size()>0) {
+
+			for(int i =0;i<=ELELIST.size();i++)
+			{
+				if (value.equalsIgnoreCase("CLICK")) {
+					
+					ELELIST.get(0).click();
+				}
+				
+				else if ((value.equalsIgnoreCase("VERIFY"))){
+					
+					Boolean ELEVERIFY= ELELIST.get(0).isDisplayed();
+					
+					if ((ELEVERIFY.booleanValue()!=true))	{
+
+						Assert.fail("Element visibily Mismatched with Expected result..!!!!!!");
+
+					}
+				}
+				
+			}
+			
+		}
+		
+		else {
+			
+			Assert.fail(objectName + " Element Not found ..!!!!!!");
+			
+		}
+	}
+	
+		
+
+	
+	
 	public void CLEAR_CART_ITEMS(WebDriver driver,Properties p,String objectName,String objectType,String value,ExtentTest test,Logger log) throws Exception {
 		//WebDriverWait myWaitVar = new WebDriverWait(driver,20);
 

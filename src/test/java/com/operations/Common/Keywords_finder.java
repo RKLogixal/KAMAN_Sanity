@@ -212,6 +212,13 @@ public class Keywords_finder {
 			key.VERIFY_WEBELEMENT_PRESENT(driver, p, objectName, objectType,value);
 
 			break;
+			
+		case "ELEMENT_FROM_LIST":
+
+			key.ELEMENT_FROM_LIST(driver, p, objectName, objectType,value);
+
+			break;
+			
 
 		case "CLEAR_TEXT":
 
